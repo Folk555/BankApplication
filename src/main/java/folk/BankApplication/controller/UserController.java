@@ -29,7 +29,7 @@ public class UserController {
             @RequestParam(required = false) String email,
             @RequestParam(required = false) String phone,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateOfBirth,
-            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
 
         log.info("Получен запрос на поиск User");
         return ResponseEntity.ok(userService.searchUsers(name, email, phone, dateOfBirth, pageable));
