@@ -1,15 +1,12 @@
 package folk.BankApplication.service;
 
+import folk.BankApplication.config.JwtTokenProvider;
 import folk.BankApplication.model.Account;
 import folk.BankApplication.repository.AccountRepository;
-import folk.BankApplication.repository.UserRepository;
-import folk.BankApplication.util.JwtUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,21 +19,13 @@ import java.util.List;
 @Slf4j
 public class AccountService {
     private final AccountRepository accountRepository;
-
-    @Cacheable(value = "balances", key = "#accountId")
-    @Transactional(readOnly = true)
-    public BigDecimal getBalance(Long accountId) {
-        log.debug("Получение баланса для аккаунта {}", accountId);
-        return accountRepository.findById(accountId)
-                .orElseThrow(() -> new EntityNotFoundException("Аккаунт не найден"))
-                .getBalance();
-    }
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
     @CacheEvict(value = "balances", allEntries = true)
     public void transferMoney(String authToken, Long toAccountId, BigDecimal amount) {
         log.info("Перевод денег на аккаунт {}", toAccountId);
-        Long fromUserId = JwtUtil.getUserIdFromToken(authToken);
+        Long fromUserId = Long.valueOf(jwtTokenProvider.getUserIdFromToken(authToken.replace("Bearer ", "")));
 
         Account fromAccount = accountRepository.findByUserIdWithLock(fromUserId)
                 .orElseThrow(() -> new EntityNotFoundException("Аккаунт отправитель не найден"));

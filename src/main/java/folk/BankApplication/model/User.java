@@ -10,6 +10,7 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "\"user\"")
@@ -41,21 +42,14 @@ public class User {
     @Size(min = 1)
     private Set<PhoneData> phones = new HashSet<>();
 
-    public void addEmail(EmailData email) {
-        email.setUser(this);
-        this.emails.add(email);
-    }
-
-    public void addPhone(PhoneData phone) {
-        phone.setUser(this);
-        this.phones.add(phone);
-    }
-
     public UserDto toDto() {
         UserDto userDto = new UserDto();
         userDto.setId(id);
         userDto.setName(name);
         userDto.setDateOfBirth(dateOfBirth);
+        userDto.setEmails(emails.stream().map(EmailData::getEmail).collect(Collectors.toSet()));
+        userDto.setPhones(phones.stream().map(PhoneData::getPhone).collect(Collectors.toSet()));
+        userDto.setBalance(account.getBalance());
         return userDto;
     }
 }

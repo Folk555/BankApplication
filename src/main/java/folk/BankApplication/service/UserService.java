@@ -1,17 +1,13 @@
 package folk.BankApplication.service;
 
+import folk.BankApplication.config.JwtTokenProvider;
 import folk.BankApplication.dto.UserDto;
 import folk.BankApplication.model.EmailData;
 import folk.BankApplication.model.PhoneData;
 import folk.BankApplication.model.User;
-import folk.BankApplication.repository.AccountRepository;
 import folk.BankApplication.repository.EmailDataRepository;
 import folk.BankApplication.repository.PhoneDataRepository;
 import folk.BankApplication.repository.UserRepository;
-import folk.BankApplication.util.JwtUtil;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SignatureAlgorithm;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,9 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.Key;
 import java.time.LocalDate;
-import java.util.Date;
 
 @Service
 @Slf4j
@@ -36,19 +30,12 @@ public class UserService {
     private final UserRepository userRepository;
     private final EmailDataRepository emailDataRepository;
     private final PhoneDataRepository phoneDataRepository;
-    private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
-
-    public UserDto getUserById(Long userId) {
-        log.debug("Поиск юзера по ID: {}", userId);
-        return userRepository.findById(userId)
-                .map(User::toDto)
-                .orElseThrow(() -> new EntityNotFoundException("User не найден в БД"));
-    }
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Cacheable(value = "users", key = "{#pageable.pageNumber, #pageable.pageSize, #name, #email, #phone, #dateOfBirth}")
     public Page<UserDto> searchUsers(String name, String email, String phone, LocalDate dateOfBirth, Pageable pageable) {
-        log.debug("Поис юзера по фильтрам - name: {}, email: {}, phone: {}, dateOfBirth: {}",
+        log.debug("Поиск юзера по фильтрам - name: {}, email: {}, phone: {}, dateOfBirth: {}",
                 name, email, phone, dateOfBirth);
 
         return userRepository.findWithFilters(name, email, phone, dateOfBirth, pageable).map(User::toDto);
@@ -140,7 +127,7 @@ public class UserService {
             throw new AuthenticationException("Неверный пароль") {};
         }
 
-        return JwtUtil.generateJwtToken(user.getId());
+        return jwtTokenProvider.createToken(user.getId());
     }
 
 }

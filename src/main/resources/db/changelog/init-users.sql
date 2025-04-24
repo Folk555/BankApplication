@@ -27,3 +27,10 @@ VALUES
     (1, 1, '+79161234567'),
     (2, 2, '+79269876543'),
     (3, 2, '+79269876333');
+
+-- changeset author:folk
+-- comment: обновление последовательностей
+SELECT setval('user_id_seq', (SELECT MAX(id) FROM "user"));
+SELECT setval('account_id_seq', (SELECT MAX(id) FROM account));
+SELECT setval('email_data_id_seq', (SELECT MAX(id) FROM email_data));
+SELECT setval('phone_data_id_seq', (SELECT MAX(id) FROM phone_data));

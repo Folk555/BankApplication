@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 @RestController
 @RequestMapping("/api/transfers")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class TransferController {
     private final AccountService accountService;
 
@@ -21,6 +22,6 @@ public class TransferController {
             @RequestParam String amount) {
 
         accountService.transferMoney(authToken, toAccountId, new BigDecimal(amount));
-        return ResponseEntity.ok("Transfer successful");
+        return ResponseEntity.ok("Перевод выполнен успешно");
     }
 }

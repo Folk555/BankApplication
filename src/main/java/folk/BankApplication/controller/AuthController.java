@@ -16,7 +16,9 @@ public class AuthController {
 
     @PostMapping("/login")
     public String login(@RequestBody LoginRequest request) {
-        return userService.authenticate(request.email(), request.password());
+        String email = request.email();
+        String password = request.password();
+        return userService.authenticate(email, password);
     }
 
     public record LoginRequest(String email, String password) {}
