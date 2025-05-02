@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
-    boolean existsByName(String name);
 
     default Page<User> findWithFilters(String name, String email, String phone, LocalDate dateOfBirth, Pageable pageable) {
         return findAll((root, query, cb) -> {
@@ -33,6 +32,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
             if (phone != null) {
                 predicates.add(cb.equal(root.join("phones").get("phone"), phone));
             }
+            query.distinct(true);
 
             return cb.and(predicates.toArray(new Predicate[0]));
         }, pageable);

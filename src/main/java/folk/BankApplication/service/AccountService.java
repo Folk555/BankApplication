@@ -23,23 +23,29 @@ public class AccountService {
 
     @Transactional
     @CacheEvict(value = "balances", allEntries = true)
-    public void transferMoney(String authToken, Long toAccountId, BigDecimal amount) {
-        log.info("Перевод денег на аккаунт {}", toAccountId);
-        Long fromUserId = Long.valueOf(jwtTokenProvider.getUserIdFromToken(authToken.replace("Bearer ", "")));
-
-        Account fromAccount = accountRepository.findByUserIdWithLock(fromUserId)
-                .orElseThrow(() -> new EntityNotFoundException("Аккаунт отправитель не найден"));
-        Account toAccount = accountRepository.findByUserIdWithLock(toAccountId)
-                .orElseThrow(() -> new EntityNotFoundException("Аккаунт получатель не найден"));
+    public void transferMoney(Long fromUserId, Long toUserId, BigDecimal amount) {
+        log.info("Перевод денег на аккаунт юзера {}", toUserId);
 
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Неверная сумма перевода " + amount);
         }
+        if (fromUserId.equals(toUserId)) {
+            throw new IllegalArgumentException("Отправитель и получатель не могут совпадать");
+        }
+
+        Long firstUserId = fromUserId.compareTo(toUserId) < 0 ? fromUserId : toUserId;
+        Long secondUserId = fromUserId.compareTo(toUserId) < 0 ? toUserId : fromUserId;
+
+        Account firstAccount = accountRepository.findByUserIdWithLock(firstUserId)
+                .orElseThrow(() -> new EntityNotFoundException("Аккаунт отправитель не найден"));
+        Account secondAccount = accountRepository.findByUserIdWithLock(secondUserId)
+                .orElseThrow(() -> new EntityNotFoundException("Аккаунт получатель не найден"));
+
+        Account fromAccount = firstUserId.equals(fromUserId) ? firstAccount : secondAccount;
+        Account toAccount = secondUserId.equals(toUserId) ? secondAccount : firstAccount;
+
         if (fromAccount.getBalance().compareTo(amount) < 0) {
             throw new IllegalArgumentException("Недостаточно средств на балансе отправителя");
-        }
-        if (fromAccount.getId().equals(toAccount.getId())) {
-            throw new IllegalArgumentException("Отправитель и получатель не могут совпадать");
         }
 
         fromAccount.setBalance(fromAccount.getBalance().subtract(amount));

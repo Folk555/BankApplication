@@ -15,13 +15,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
-//    @ExceptionHandler(AuthenticationException.class)
-//    public ResponseEntity<String> authenticationError(EntityNotFoundException ex) {
-//        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
-//    }
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<String> authenticationError(AuthenticationException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> illegalArgumentException(EntityNotFoundException ex) {
+    public ResponseEntity<String> illegalArgumentException(IllegalArgumentException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 

@@ -24,13 +24,8 @@ class TransferControllerTest {
     @Mock
     private AccountRepository accountRepository;
 
-    @Mock
-    private JwtTokenProvider jwtTokenProvider;
-
     @InjectMocks
     private AccountService accountService;
-
-    private static final String TOKEN = "Bearer some-jwt-token";
 
     private Account fromAccount;
     private Account toAccount;
@@ -43,11 +38,10 @@ class TransferControllerTest {
 
     @Test
     void transferMoney_SuccessfulTransfer() {
-        when(jwtTokenProvider.getUserIdFromToken(TOKEN.replace("Bearer ", ""))).thenReturn("1");
         when(accountRepository.findByUserIdWithLock(1L)).thenReturn(Optional.of(fromAccount));
         when(accountRepository.findByUserIdWithLock(2L)).thenReturn(Optional.of(toAccount));
 
-        accountService.transferMoney(TOKEN, 2L, new BigDecimal("100"));
+        accountService.transferMoney(1L, 2L, new BigDecimal("100"));
 
         assertEquals(new BigDecimal("400"), fromAccount.getBalance());
         assertEquals(new BigDecimal("200"), toAccount.getBalance());
@@ -57,12 +51,11 @@ class TransferControllerTest {
 
     @Test
     void transferMoney_InsufficientFunds() {
-        when(jwtTokenProvider.getUserIdFromToken(TOKEN.replace("Bearer ", ""))).thenReturn("1");
         when(accountRepository.findByUserIdWithLock(1L)).thenReturn(Optional.of(fromAccount));
         when(accountRepository.findByUserIdWithLock(2L)).thenReturn(Optional.of(toAccount));
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            accountService.transferMoney(TOKEN, 2L, new BigDecimal("600"));
+            accountService.transferMoney(1L, 2L, new BigDecimal("600"));
         });
 
         assertEquals("Недостаточно средств на балансе отправителя", exception.getMessage());

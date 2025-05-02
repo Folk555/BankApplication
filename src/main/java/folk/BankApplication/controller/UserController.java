@@ -2,6 +2,7 @@ package folk.BankApplication.controller;
 
 import folk.BankApplication.dto.UserDto;
 import folk.BankApplication.service.UserService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -20,6 +22,7 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "User API", description = "Управление пользователями")
+@SecurityRequirement(name = "bearerAuth")
 public class UserController {
     private final UserService userService;
 
@@ -37,32 +40,32 @@ public class UserController {
 
     @PostMapping("/phone")
     public ResponseEntity<String> addPhone(
-            @RequestParam Long userId,
             @RequestParam String phone) {
+        Long userId = Long.valueOf((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         userService.addUserPhone(userId, phone);
         return ResponseEntity.ok("Телефон добавлен");
     }
 
     @DeleteMapping("/phone")
     public ResponseEntity<String> removePhone(
-            @RequestParam Long userId,
             @RequestParam String phone) {
+        Long userId = Long.valueOf((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         userService.removeUserPhone(userId, phone);
         return ResponseEntity.ok("Телефон удален");
     }
 
     @PostMapping("/email")
     public ResponseEntity<String> addEmail(
-            @RequestParam Long userId,
             @RequestParam String email) {
+        Long userId = Long.valueOf((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         userService.addUserEmail(userId, email);
         return ResponseEntity.ok("Email добавлен");
     }
 
     @DeleteMapping("/email")
     public ResponseEntity<String> removeEmail(
-            @RequestParam Long userId,
             @RequestParam String email) {
+        Long userId = Long.valueOf((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         userService.removeUserEmail(userId, email);
         return ResponseEntity.ok("Email удален");
     }

@@ -4,6 +4,7 @@ import folk.BankApplication.service.AccountService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -17,11 +18,10 @@ public class TransferController {
 
     @PostMapping
     public ResponseEntity<String> transfer(
-            @RequestHeader(value = "Authorization", required = false) String authToken,
             @RequestParam Long toAccountId,
             @RequestParam String amount) {
-
-        accountService.transferMoney(authToken, toAccountId, new BigDecimal(amount));
+        Long userId = Long.valueOf((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        accountService.transferMoney(userId, toAccountId, new BigDecimal(amount));
         return ResponseEntity.ok("Перевод выполнен успешно");
     }
 }

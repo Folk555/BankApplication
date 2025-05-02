@@ -21,6 +21,6 @@ public class PhoneData {
     private User user;
 
     @Column(nullable = false, unique = true)
-    @Pattern(regexp = "^\\+?[0-9]{10}$")
+    @Pattern(regexp = "^\\+?[0-9]{11}$")
     private String phone;
 }
